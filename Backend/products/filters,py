@@ -1,0 +1,21 @@
+
+class ProductViewSet(viewsets.ModelViewSet):
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+    ]
+
+    filterset_fields = [
+        "category",
+        "brand",
+        "in_stock",
+    ]
+
+    ordering_fields = [
+        "price",
+        "rating",
+    ]
