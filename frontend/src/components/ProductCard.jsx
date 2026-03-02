@@ -2,10 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import wishlistIcon from "../assets/navbar/wishlist.png";
 import addIcon from "../assets/navbar/cart.png";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductCard({ product }) {
 
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { toggleWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
+
 
   const goToProduct = () => {
     navigate(`/product/${product.id}`);
@@ -29,7 +36,10 @@ export default function ProductCard({ product }) {
 
       {/* ===== WISHLIST ===== */}
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleWishlist(product);
+        }}
         className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
         style={{ border: "2px solid #A1555599" }}
       >
@@ -88,6 +98,10 @@ export default function ProductCard({ product }) {
           className="flex gap-2"
         >
           <button
+           onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product);
+          }}
             className="flex items-center gap-1 text-white px-3 py-1 rounded-full text-sm"
             style={{ background: "#1C8057" }}
           >
@@ -95,12 +109,25 @@ export default function ProductCard({ product }) {
             ADD
           </button>
 
+
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+
+              if (!isAuthenticated) {
+                navigate("/login");
+                return;
+              }
+
+              addToCart(product);
+              navigate("/checkout");
+            }}
             className="px-3 py-1 rounded-full text-sm font-medium"
             style={{ background: "#F9C51A" }}
           >
             Buy now
           </button>
+
         </div>
 
       </div>

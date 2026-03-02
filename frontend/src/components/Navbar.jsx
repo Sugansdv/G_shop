@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 import logo from "../assets/navbar/logo.png";
 import locationIcon from "../assets/navbar/location.png";
 import truckIcon from "../assets/navbar/truck.png";
@@ -10,9 +10,14 @@ import cartIcon from "../assets/navbar/cart.png";
 import userIcon from "../assets/navbar/user.png";
 import yellowBox from "../assets/navbar/browse_cat.png";
 import arrow from "../assets/navbar/down_arrow.png";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+
 
 export default function Navbar() {
   const [location, setLocation] = useState("Tirunelveli, Tamil Nadu");
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
 
   return (
     <div className="w-full">
@@ -112,9 +117,29 @@ export default function Navbar() {
             {/* ICONS */}
             <div className="flex items-center gap-5">
 
-              <img src={wishlistIcon} className="w-6 cursor-pointer" />
+              <div className="relative">
+  <Link to="/wishlist" className="relative">
+    <img src={wishlistIcon} className="w-6 cursor-pointer" />
+</Link>
 
-              <img src={cartIcon} className="w-6 cursor-pointer" />
+  {wishlistCount > 0 && (
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+      {wishlistCount}
+    </span>
+  )}
+</div>
+
+              <div className="relative">
+  <Link to="/cart" className="relative">
+  <img src={cartIcon} className="w-6" />
+</Link>
+
+  {cartCount > 0 && (
+    <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
+      {cartCount}
+    </span>
+  )}
+</div>
 
               <img src={userIcon} className="w-6 cursor-pointer" />
             </div>

@@ -62,6 +62,22 @@ class Product(models.Model):
 
     image = models.ImageField(upload_to="products/")
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    display_order = models.PositiveIntegerField(
+        default=0,
+        help_text="Lower number appears first"
+    )
+    class Meta:
+        ordering = ["display_order", "-created_at"]
+    @property
+    def offer_percent(self):
+        if self.old_price and self.old_price > self.price:
+            return round(
+                (self.old_price - self.price) /
+                self.old_price * 100
+            )
+        return 0
+    
 # ================= VARIANT IMAGES =================
 
 class ProductImage(models.Model):

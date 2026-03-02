@@ -37,4 +37,4 @@ class ProductViewSet(viewsets.ModelViewSet):
         "created_at",
     ]
 
-    ordering = ["-created_at"]   # ✅ default ordering
+    ordering = ["display_order", "-created_at"] 

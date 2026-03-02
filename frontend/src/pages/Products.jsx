@@ -16,7 +16,7 @@ export default function Products() {
 
   const [filters, setFilters] = useState({
     page: 1,
-    ordering: "",
+    ordering: null,
     category: "",
     brand: "",
     in_stock: "",
@@ -34,6 +34,11 @@ export default function Products() {
   const loadProducts = async () => {
     try {
       setLoading(true);
+      const cleanFilters = Object.fromEntries(
+      Object.entries(filters).filter(
+        ([_, v]) => v !== "" && v !== null
+      )
+    );
 
       const res = await fetchProducts(filters);
 
@@ -78,16 +83,16 @@ export default function Products() {
 
           {/* SORT */}
           <select
-            value={filters.ordering}
-            onChange={(e) =>
-              setFilters(prev => ({
-                ...prev,
-                ordering: e.target.value,
-                page: 1,
-              }))
-            }
-            className="border rounded px-3 py-2 text-sm"
-          >
+  value={filters.ordering ?? ""}
+  onChange={(e) =>
+    setFilters(prev => ({
+      ...prev,
+      ordering: e.target.value || null,
+      page: 1,
+    }))
+  }
+  className="border rounded px-3 py-2 text-sm"
+>
             <option value="">Default sorting</option>
             <option value="price">Price Low → High</option>
             <option value="-price">Price High → Low</option>
@@ -97,11 +102,19 @@ export default function Products() {
 
         </div>
 
-        {/* ===== ACTIVE FILTER CHIPS ===== */}
-        <ActiveFilters
-          filters={filters}
-          setFilters={setFilters}
-        />
+       {/* ===== ACTIVE FILTER ROW ===== */}
+<div className="flex items-center gap-4 mb-6 flex-wrap">
+
+  <p className="font-semibold text-sm whitespace-nowrap">
+    Active Filters:
+  </p>
+
+  <ActiveFilters
+    filters={filters}
+    setFilters={setFilters}
+  />
+
+</div>
 
         {/* ===== PRODUCTS GRID ===== */}
         {loading ? (
