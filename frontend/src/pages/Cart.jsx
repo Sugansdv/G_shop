@@ -13,13 +13,27 @@ export default function Cart() {
 
   const navigate = useNavigate();
 
+  /* ================= CALCULATIONS ================= */
+
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
     0
   );
 
-  const shipping = subtotal > 500 ? 0 : 20;
+  const FREE_SHIPPING_LIMIT = 500;
+
+  const remainingForFreeShipping =
+    FREE_SHIPPING_LIMIT - subtotal;
+
+  const shipping =
+    subtotal === 0
+      ? 0
+      : subtotal >= FREE_SHIPPING_LIMIT
+      ? 0
+      : 20;
+
   const tax = 0;
+
   const total = subtotal + shipping + tax;
 
   return (
@@ -125,6 +139,21 @@ export default function Cart() {
       {/* ================= ORDER SUMMARY ================= */}
       <div className="border rounded-xl p-6 h-fit">
 
+        {/* ===== FREE SHIPPING MESSAGE ===== */}
+
+        {subtotal > 0 && subtotal < FREE_SHIPPING_LIMIT && (
+          <div className="bg-yellow-100 text-yellow-800 p-3 rounded-lg mb-4 text-sm font-medium">
+            Add ₹ {remainingForFreeShipping.toFixed(0)} more for
+            <span className="font-bold"> FREE delivery 🚚</span>
+          </div>
+        )}
+
+        {subtotal >= FREE_SHIPPING_LIMIT && (
+          <div className="bg-green-100 text-green-700 p-3 rounded-lg mb-4 text-sm font-semibold">
+            🎉 You unlocked FREE delivery!
+          </div>
+        )}
+
         <h2 className="font-semibold mb-6">
           Order Summary
         </h2>
@@ -143,7 +172,9 @@ export default function Cart() {
 
           <div className="flex justify-between">
             <span>Shipping</span>
-            <span>₹ {shipping}</span>
+            <span>
+              {shipping === 0 ? "Free" : `₹ ${shipping}`}
+            </span>
           </div>
 
           <div className="flex justify-between">
@@ -162,12 +193,13 @@ export default function Cart() {
 
         <button
           onClick={() => navigate("/checkout")}
-          className="w-full mt-6 bg-green-700 text-white py-3 rounded-full"
+          className="w-full mt-6 bg-green-700 text-white py-3 rounded-full hover:bg-green-800 transition"
         >
           Proceed to Checkout
         </button>
 
       </div>
+
     </div>
   );
 }

@@ -30,35 +30,34 @@ export function CartProvider({ children }) {
     });
   };
 
+  const removeFromCart = (id) =>
+    setCart(prev => prev.filter(p => p.id !== id));
+
+  const decreaseQty = (id) => {
+    setCart(prev =>
+      prev
+        .map(p =>
+          p.id === id ? { ...p, qty: p.qty - 1 } : p
+        )
+        .filter(p => p.qty > 0)
+    );
+  };
+
+  const clearCart = () => setCart([]);
+
   const cartCount = cart.reduce((a, b) => a + b.qty, 0);
-
-  const removeFromCart = (id) => {
-  setCart(prev => prev.filter(p => p.id !== id));
-};
-
-const decreaseQty = (id) => {
-  setCart(prev =>
-    prev
-      .map(p =>
-        p.id === id ? { ...p, qty: p.qty - 1 } : p
-      )
-      .filter(p => p.qty > 0)
-  );
-};
-
-const clearCart = () => setCart([]);
 
   return (
     <CartContext.Provider
-        value={{
-            cart,
-            addToCart,
-            removeFromCart,
-            decreaseQty,
-            clearCart,
-            cartCount,
-        }}
-        >
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        decreaseQty,
+        clearCart,
+        cartCount,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -111,22 +111,22 @@ export default function ProductCard({ product }) {
 
 
           <button
-            onClick={(e) => {
-              e.stopPropagation();
+  onClick={(e) => {
+    e.stopPropagation();
 
-              if (!isAuthenticated) {
-                navigate("/login");
-                return;
-              }
+    if (!isAuthenticated) {
+      navigate("/login?next=/checkout");
+      return;
+    }
 
-              addToCart(product);
-              navigate("/checkout");
-            }}
-            className="px-3 py-1 rounded-full text-sm font-medium"
-            style={{ background: "#F9C51A" }}
-          >
-            Buy now
-          </button>
+    addToCart(product);
+    navigate("/checkout");
+  }}
+  className="px-3 py-1 rounded-full text-sm font-medium"
+  style={{ background: "#F9C51A" }}
+>
+  Buy now
+</button>
 
         </div>
 

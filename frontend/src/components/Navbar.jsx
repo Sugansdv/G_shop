@@ -12,12 +12,15 @@ import yellowBox from "../assets/navbar/browse_cat.png";
 import arrow from "../assets/navbar/down_arrow.png";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 
 
 export default function Navbar() {
   const [location, setLocation] = useState("Tirunelveli, Tamil Nadu");
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [openAccount, setOpenAccount] = useState(false);
 
   return (
     <div className="w-full">
@@ -141,7 +144,52 @@ export default function Navbar() {
   )}
 </div>
 
-              <img src={userIcon} className="w-6 cursor-pointer" />
+              <div className="relative">
+
+  {/* ---------- NOT LOGGED IN ---------- */}
+  {!isAuthenticated ? (
+    <Link to="/login">
+      <img src={userIcon} className="w-6 cursor-pointer" />
+    </Link>
+  ) : (
+
+    <>
+      {/* USER BUTTON */}
+      <div
+        onClick={() => setOpenAccount(!openAccount)}
+        className="flex items-center gap-2 cursor-pointer"
+      >
+        <img src={userIcon} className="w-6" />
+
+        <span className="hidden md:block font-semibold">
+          Hello {user.username}
+        </span>
+      </div>
+
+      {/* DROPDOWN */}
+      {openAccount && (
+        <div className="absolute right-0 mt-3 w-40 bg-white text-black rounded-lg shadow-lg z-50">
+
+          <Link
+            to="/profile"
+            className="block px-4 py-2 hover:bg-gray-100"
+          >
+            My Account
+          </Link>
+
+          <button
+            onClick={logout}
+            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Logout
+          </button>
+
+        </div>
+      )}
+    </>
+  )}
+
+</div>
             </div>
           </div>
 
