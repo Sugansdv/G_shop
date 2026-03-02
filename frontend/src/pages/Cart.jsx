@@ -1,5 +1,6 @@
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Cart() {
 
@@ -11,12 +12,14 @@ export default function Cart() {
     clearCart,
   } = useCart();
 
+  const { isAuthenticated } = useAuth();
+
   const navigate = useNavigate();
 
   /* ================= CALCULATIONS ================= */
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
+    (sum, item) => sum + Number(item.price) * item.qty,
     0
   );
 
@@ -33,8 +36,22 @@ export default function Cart() {
       : 20;
 
   const tax = 0;
-
   const total = subtotal + shipping + tax;
+
+  /* ================= CHECKOUT HANDLER ================= */
+
+  const handleCheckout = () => {
+
+    if (!isAuthenticated) {
+      // redirect to login and come back
+      navigate("/login?next=/checkout");
+      return;
+    }
+
+    navigate("/checkout");
+  };
+
+  /* ================= UI ================= */
 
   return (
     <div className="max-w-7xl mx-auto p-6 grid md:grid-cols-3 gap-8">
@@ -105,7 +122,9 @@ export default function Cart() {
             </div>
 
             {/* SUBTOTAL */}
-            <p>₹ {(item.price * item.qty).toFixed(2)}</p>
+            <p>
+              ₹ {(Number(item.price) * item.qty).toFixed(2)}
+            </p>
 
           </div>
 
@@ -139,7 +158,7 @@ export default function Cart() {
       {/* ================= ORDER SUMMARY ================= */}
       <div className="border rounded-xl p-6 h-fit">
 
-        {/* ===== FREE SHIPPING MESSAGE ===== */}
+        {/* FREE SHIPPING MESSAGE */}
 
         {subtotal > 0 && subtotal < FREE_SHIPPING_LIMIT && (
           <div className="bg-yellow-100 text-yellow-800 p-3 rounded-lg mb-4 text-sm font-medium">
@@ -191,9 +210,19 @@ export default function Cart() {
 
         </div>
 
+        {/* CHECKOUT BUTTON */}
         <button
-          onClick={() => navigate("/checkout")}
-          className="w-full mt-6 bg-green-700 text-white py-3 rounded-full hover:bg-green-800 transition"
+          onClick={handleCheckout}
+          className="
+            w-full
+            mt-6
+            bg-green-700
+            text-white
+            py-3
+            rounded-full
+            hover:bg-green-800
+            transition
+          "
         >
           Proceed to Checkout
         </button>

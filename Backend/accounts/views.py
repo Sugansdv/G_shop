@@ -19,7 +19,10 @@ class AuthViewSet(viewsets.ViewSet):
 
         return Response(serializer.errors, status=400)
 
+from rest_framework.authtoken.models import Token
+
 User = get_user_model()
+
 
 class LoginViewSet(viewsets.ViewSet):
 
@@ -32,12 +35,11 @@ class LoginViewSet(viewsets.ViewSet):
             username_or_email = serializer.validated_data["username"]
             password = serializer.validated_data["password"]
 
-            # ✅ check email first
+            # ✅ login using email or username
             user = User.objects.filter(
                 email=username_or_email
             ).first()
 
-            # if email found → use username
             if user:
                 username = user.username
             else:
@@ -49,10 +51,17 @@ class LoginViewSet(viewsets.ViewSet):
             )
 
             if user:
+
+                # ✅ CREATE TOKEN
+                token, created = Token.objects.get_or_create(user=user)
+
                 return Response({
                     "message": "Login successful",
-                    "username": user.username,
-                    "email": user.email,
+                    "token": token.key,   # ⭐ IMPORTANT
+                    "user": {
+                        "username": user.username,
+                        "email": user.email,
+                    }
                 })
 
             return Response(

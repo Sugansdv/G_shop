@@ -7,6 +7,7 @@ import Wishlist from "./pages/Wishlist";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Checkout from "./pages/Checkout";
+import Bill from "./pages/Bill";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/bill" element={<Bill />} />
       </Routes>
     </BrowserRouter>
   );

@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { loginUser } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
-import { useLocation } from "react-router-dom";
+
 import bg from "../assets/images/login_bg.png";
 import userImg from "../assets/images/user.png";
 
 export default function Login() {
 
   const navigate = useNavigate();
-  const { login } = useAuth();
   const location = useLocation();
+  const { login } = useAuth();
 
+  /* ✅ redirect after login */
   const redirectTo =
     new URLSearchParams(location.search).get("next") || "/";
 
@@ -24,15 +25,17 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* ---------- INPUT ---------- */
+  /* ================= INPUT CHANGE ================= */
+
   const handleChange = (e) => {
-    setForm({
-      ...form,
+    setForm(prev => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
-  /* ---------- LOGIN ---------- */
+  /* ================= LOGIN ================= */
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -42,46 +45,56 @@ export default function Login() {
 
       const res = await loginUser(form);
 
-      login({
-        username: res.data.username,
-      });
+      /* ✅ SAVE TOKEN (IMPORTANT FIX) */
+      localStorage.setItem("token", res.data.token);
 
+      /* ✅ SAVE USER */
+      login(res.data.user);
+
+      /* ✅ REDIRECT */
       navigate(redirectTo);
 
     } catch (err) {
+
       const errors = err.response?.data;
 
       if (errors?.detail) {
         setError(errors.detail);
+      } else if (errors?.error) {
+        setError(errors.error);
       } else {
-        setError("Invalid username or password");
+        setError("Invalid username/email or password");
       }
+
     } finally {
       setLoading(false);
     }
   };
 
+  /* ================= UI ================= */
+
   return (
     <div className="relative min-h-screen flex items-center -my-16">
 
-      {/* ===== BACKGROUND IMAGE ===== */}
+      {/* BACKGROUND */}
       <img
         src={bg}
         alt="background"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-h-screen w-[800px] object-contain pointer-events-none"
+        className="
+          absolute
+          top-1/2 left-1/2
+          -translate-x-1/2 -translate-y-1/2
+          max-h-screen w-[800px]
+          object-contain pointer-events-none
+        "
       />
 
-
-      {/* ===== LOGIN FORM LEFT SIDE ===== */}
+      {/* LOGIN FORM */}
       <div className="absolute left-72 z-10 flex items-center h-screen pl-10 md:pl-24">
 
         <form
           onSubmit={handleLogin}
-          className="
-            w-[380px]
-            text-white
-            p-10
-          "
+          className="w-[380px] text-white p-10"
         >
 
           {/* Avatar */}
@@ -94,7 +107,7 @@ export default function Login() {
           </h1>
 
           <Input
-            label="Username"
+            label="Username / Email"
             name="username"
             onChange={handleChange}
           />
@@ -110,13 +123,14 @@ export default function Login() {
             Forgot Password?
           </p>
 
-          {/* ERROR MESSAGE */}
+          {/* ERROR */}
           {error && (
             <p className="text-red-300 text-sm text-center mt-4">
               {error}
             </p>
           )}
 
+          {/* LOGIN BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -129,7 +143,6 @@ export default function Login() {
               rounded-md
               mt-6
               hover:bg-[#0D5C44]
-              hover:border-x-emerald-950
               hover:text-yellow-400
               transition
             "
@@ -144,7 +157,7 @@ export default function Login() {
 }
 
 
-/* ---------- INPUT ---------- */
+/* ================= INPUT COMPONENT ================= */
 
 function Input({ label, type = "text", name, onChange }) {
   return (
@@ -160,9 +173,11 @@ function Input({ label, type = "text", name, onChange }) {
           w-full
           bg-transparent
           border-b-2
-          border-yellow-400
+          border-white
+          focus:border-yellow-400
           outline-none
           py-2
+          transition
         "
       />
     </div>
