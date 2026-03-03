@@ -57,13 +57,21 @@ export default function Register() {
       password: form.password,
     });
 
-    // 🎉 SHOW COUPON ALERT HERE
-    alert(`🎉 Welcome! Use coupon ${res.data.coupon_code} for 50% OFF`);
+    const { user, token, coupon_code } = res.data;
 
-    /* ✅ AUTO LOGIN */
-    login(res.data.user, res.data.token);
-    /* ✅ REDIRECT */
-    navigate(redirectTo);
+// Show coupon if exists
+if (coupon_code) {
+  alert(`🎉 Welcome! Use coupon ${coupon_code} for 50% OFF`);
+}
+
+// Only login if token exists
+if (user && token) {
+  login(user, token);
+  navigate(redirectTo);
+} else {
+  alert("Registration successful. Please login.");
+  navigate("/login");
+}
 
   } catch (err) {
 

@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate, get_user_model
 from .serializers import LoginSerializer
 import random
 from orders.models import Coupon
-
 class AuthViewSet(viewsets.ViewSet):
 
     def create(self, request):
@@ -14,7 +13,7 @@ class AuthViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             user = serializer.save()
 
-            #Generate coupon
+            # Generate coupon
             coupon_code = f"WELCOME{random.randint(1000,9999)}"
 
             Coupon.objects.create(
@@ -23,10 +22,18 @@ class AuthViewSet(viewsets.ViewSet):
                 user=user
             )
 
+            # Create token
+            token, created = Token.objects.get_or_create(user=user)
+
             return Response(
                 {
                     "message": "User registered successfully",
                     "coupon_code": coupon_code,
+                    "token": token.key,
+                    "user": {
+                        "username": user.username,
+                        "email": user.email,
+                    }
                 },
                 status=status.HTTP_201_CREATED,
             )

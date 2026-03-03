@@ -8,17 +8,24 @@ export function AuthProvider({ children }) {
 
   const [user, setUser] = useState(null);
 
-  /* ✅ Load user ONLY if token exists */
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
 
-    if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-    } else {
+  if (storedUser && token) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+    } catch (err) {
+      console.error("Invalid user JSON in localStorage");
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
       setUser(null);
     }
-  }, []);
+  } else {
+    setUser(null);
+  }
+}, []);
 
   /* ---------- LOGIN ---------- */
   const login = (userData, token) => {

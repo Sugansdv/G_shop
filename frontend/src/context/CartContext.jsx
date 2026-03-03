@@ -6,14 +6,22 @@ export const useCart = () => useContext(CartContext);
 
 export function CartProvider({ children }) {
 
-  /* ================= CART STATE ================= */
+  /* ================= SAFE INITIAL STATE ================= */
 
   const [cart, setCart] = useState(() => {
-    return JSON.parse(localStorage.getItem("cart")) || [];
+    try {
+      const storedCart = localStorage.getItem("cart");
+      return storedCart ? JSON.parse(storedCart) : [];
+    } catch (err) {
+      console.error("Invalid cart JSON in localStorage");
+      localStorage.removeItem("cart");
+      return [];
+    }
   });
 
   const [discount, setDiscount] = useState(() => {
-    return Number(localStorage.getItem("discount")) || 0;
+    const storedDiscount = localStorage.getItem("discount");
+    return storedDiscount ? Number(storedDiscount) : 0;
   });
 
   const [appliedCoupon, setAppliedCoupon] = useState(() => {
@@ -23,11 +31,15 @@ export function CartProvider({ children }) {
   /* ================= LOCAL STORAGE SYNC ================= */
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
+    try {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } catch (err) {
+      console.error("Failed to save cart to localStorage");
+    }
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem("discount", discount);
+    localStorage.setItem("discount", discount.toString());
   }, [discount]);
 
   useEffect(() => {
@@ -49,14 +61,13 @@ export function CartProvider({ children }) {
             : p
         );
       } else {
-        updatedCart = [...prev, { ...product, qty: 1 }];
+        updatedCart = [...prev, { ...product, qty: product.qty || 1 }];
       }
 
       return updatedCart;
     });
 
-    // ⚠️ Remove coupon if cart changes
-    removeCoupon();
+    removeCoupon(); // Remove coupon if cart changes
   };
 
   const removeFromCart = (id) => {
@@ -93,9 +104,9 @@ export function CartProvider({ children }) {
     setDiscount(0);
   };
 
-  /* ================= COUNT ================= */
+  /* ================= CART COUNT ================= */
 
-  const cartCount = cart.reduce((a, b) => a + b.qty, 0);
+  const cartCount = cart.reduce((total, item) => total + item.qty, 0);
 
   return (
     <CartContext.Provider
