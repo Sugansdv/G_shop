@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 export default function ProductCard({ product }) {
 
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, clearCart } = useCart();
   const { toggleWishlist } = useWishlist();
   const { isAuthenticated } = useAuth();
 
@@ -110,7 +110,7 @@ export default function ProductCard({ product }) {
           </button>
 
 
-          <button
+         <button
   onClick={(e) => {
     e.stopPropagation();
 
@@ -119,7 +119,13 @@ export default function ProductCard({ product }) {
       return;
     }
 
-    addToCart(product);
+    clearCart(); // remove existing cart items
+
+    addToCart({
+      ...product,
+      qty: 1, // ProductCard always buys 1 qty
+    });
+
     navigate("/checkout");
   }}
   className="px-3 py-1 rounded-full text-sm font-medium"

@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate, get_user_model
 from .serializers import LoginSerializer
-
+import random
+from orders.models import Coupon
 
 class AuthViewSet(viewsets.ViewSet):
 
@@ -11,9 +12,22 @@ class AuthViewSet(viewsets.ViewSet):
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+
+            #Generate coupon
+            coupon_code = f"WELCOME{random.randint(1000,9999)}"
+
+            Coupon.objects.create(
+                code=coupon_code,
+                discount_percent=50,
+                user=user
+            )
+
             return Response(
-                {"message": "User registered successfully"},
+                {
+                    "message": "User registered successfully",
+                    "coupon_code": coupon_code,
+                },
                 status=status.HTTP_201_CREATED,
             )
 

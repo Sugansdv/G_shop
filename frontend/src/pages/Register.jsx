@@ -37,51 +37,52 @@ export default function Register() {
 
   /* ---------- REGISTER ---------- */
   const handleRegister = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (loading) return;
+  if (loading) return;
 
-    if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await registerUser({
-        username: form.username,
-        email: form.email,
-        phone: form.phone,
-        password: form.password,
-      });
-
-      /* ✅ AUTO LOGIN */
-      login({
-        username: form.username,
-        email: form.email,
-      });
-
-      /* ✅ REDIRECT HOME */
-      navigate(redirectTo);
-
-    } catch (err) {
-
-  console.log(err.response?.data);
-
-  const errors = err.response?.data;
-
-  if (errors?.username) {
-    alert(errors.username[0]);
-  } else if (errors?.email) {
-    alert(errors.email[0]);
-  } else {
-    alert("Registration failed");
+  if (form.password !== form.confirmPassword) {
+    alert("Passwords do not match");
+    return;
   }
-}finally {
-      setLoading(false);
+
+  try {
+    setLoading(true);
+
+    // ✅ SAVE RESPONSE
+    const res = await registerUser({
+      username: form.username,
+      email: form.email,
+      phone: form.phone,
+      password: form.password,
+    });
+
+    // 🎉 SHOW COUPON ALERT HERE
+    alert(`🎉 Welcome! Use coupon ${res.data.coupon_code} for 50% OFF`);
+
+    /* ✅ AUTO LOGIN */
+    login(res.data.user, res.data.token);
+    /* ✅ REDIRECT */
+    navigate(redirectTo);
+
+  } catch (err) {
+
+    console.log(err.response?.data);
+
+    const errors = err.response?.data;
+
+    if (errors?.username) {
+      alert(errors.username[0]);
+    } else if (errors?.email) {
+      alert(errors.email[0]);
+    } else {
+      alert("Registration failed");
     }
-  };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="relative min-h-screen flex items-center justify-center my-10">

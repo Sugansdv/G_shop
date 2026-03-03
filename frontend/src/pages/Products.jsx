@@ -40,7 +40,8 @@ export default function Products() {
       )
     );
 
-      const res = await fetchProducts(filters);
+      // const res = await fetchProducts(filters);
+      const res = await fetchProducts(cleanFilters);
 
       setProducts(res.data.results || []);
       setTotal(res.data.count || 0);

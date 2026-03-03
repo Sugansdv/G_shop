@@ -8,7 +8,8 @@ import { verifyPayment } from "../api/orderApi";
 
 export default function Checkout() {
 
-  const { cart } = useCart();
+  const { cart, clearCart, discount, appliedCoupon } = useCart();
+  
 
   /* ================= STATE ================= */
 
@@ -25,7 +26,6 @@ export default function Checkout() {
 
   const shipping = subtotal >= 500 ? 0 : 20;
   const tax = 0;
-  const discount = 10;
 
   const total = subtotal + shipping + tax - discount;
 
@@ -48,11 +48,11 @@ export default function Checkout() {
   zip_code: form.get("zip_code"),
   phone: form.get("phone"),
   email: form.get("email"),
-
-  subtotal,
-  shipping,
-  tax,
-  total,
+  coupon_code: appliedCoupon,
+  subtotal: subtotal.toString(),
+shipping: shipping.toString(),
+tax: tax.toString(),
+total: total.toString(),
 
   items: cart.map(item => ({
     product_name: item.name,
@@ -86,6 +86,13 @@ export default function Checkout() {
 
       const res = await createPayment(orderId);
 
+      if (res.data.message === "Free order - no payment required") {
+        clearCart();
+        window.location.href = `/bill/${orderId}`;
+        return;
+      }
+
+
       const options = {
         key: res.data.key,
         amount: res.data.amount,
@@ -97,18 +104,24 @@ export default function Checkout() {
 
        handler: async function (response) {
 
-            await verifyPayment({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-            });
+    try {
+        await verifyPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+        });
 
-            window.location.href = "/bill";
-        },
+        // CLEAR CART AFTER SUCCESS
+        clearCart();
 
-        theme: {
-          color: "#1C8057",
-        },
+        // REDIRECT
+        window.location.href = `/bill/${orderId}`;
+
+    } catch (err) {
+        console.error("Verification failed:", err);
+        alert("Payment verification failed");
+    }
+},
       };
 
       const rzp = new window.Razorpay(options);

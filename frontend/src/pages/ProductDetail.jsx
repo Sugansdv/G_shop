@@ -1,7 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 import wishlistIcon from "../assets/navbar/wishlist.png";
 import facebookIcon from "../assets/images/facebook.png";
 import twitterIcon from "../assets/images/twitter.png";
@@ -11,6 +13,10 @@ import pinterestIcon from "../assets/images/pinterest.png";
 export default function ProductDetail() {
 
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { addToCart, clearCart } = useCart();
+
 
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState("");
@@ -22,6 +28,29 @@ export default function ProductDetail() {
       setMainImage(res.data.image);
     });
   }, [id]);
+
+const handleAddToCart = () => {
+  addToCart({
+    ...product,
+    qty: qty,  
+  });
+};
+
+ const handleBuyNow = () => {
+  if (!isAuthenticated) {
+    navigate("/login?next=/checkout");
+    return;
+  }
+
+  clearCart(); 
+
+  addToCart({
+    ...product,
+    qty: qty,
+  });
+
+  navigate("/checkout");
+};
 
   if (!product) return <p>Loading...</p>;
 
@@ -140,15 +169,19 @@ export default function ProductDetail() {
             >+</button>
           </div>
 
-          {/* ADD TO CART */}
-          <button className="bg-green-700 text-white px-6 py-3 rounded-full">
-            Add To Cart
-          </button>
+          <button
+  onClick={handleAddToCart}
+  className="bg-green-700 text-white px-6 py-3 rounded-full"
+>
+  Add To Cart
+</button>
 
-          {/* BUY NOW */}
-          <button className="bg-yellow-400 px-6 py-3 rounded-full font-semibold">
-            Buy Now
-          </button>
+<button
+  onClick={handleBuyNow}
+  className="bg-yellow-400 px-6 py-3 rounded-full font-semibold"
+>
+  Buy Now
+</button>
 
           {/* WISHLIST */}
           <button className="border rounded-full p-3">

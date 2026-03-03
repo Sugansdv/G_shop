@@ -45,13 +45,10 @@ export default function Login() {
 
       const res = await loginUser(form);
 
-      /* ✅ SAVE TOKEN (IMPORTANT FIX) */
-      localStorage.setItem("token", res.data.token);
+      /* SAVE TOKEN (IMPORTANT FIX) */
+      login(res.data.user, res.data.token);
 
-      /* ✅ SAVE USER */
-      login(res.data.user);
-
-      /* ✅ REDIRECT */
+      /* REDIRECT */
       navigate(redirectTo);
 
     } catch (err) {

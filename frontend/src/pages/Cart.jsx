@@ -1,20 +1,27 @@
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
+import { applyCoupon as applyCouponAPI } from "../api/couponApi";
 
 export default function Cart() {
 
   const {
-    cart,
-    addToCart,
-    removeFromCart,
-    decreaseQty,
-    clearCart,
-  } = useCart();
+  cart,
+  addToCart,
+  removeFromCart,
+  decreaseQty,
+  clearCart,
+  discount,
+  appliedCoupon,
+  applyCoupon,   // from context
+} = useCart();
 
   const { isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
+  // 🎁 COUPON STATE
+  const [coupon, setCoupon] = useState("");
 
   /* ================= CALCULATIONS ================= */
 
@@ -36,8 +43,21 @@ export default function Cart() {
       : 20;
 
   const tax = 0;
-  const total = subtotal + shipping + tax;
+ const total = subtotal + shipping + tax - discount;
+  const handleApplyCoupon = async () => {
+  try {
+    const data = await applyCouponAPI(coupon);
 
+    const percent = data.discount_percent;
+    const discountAmount = (subtotal * percent) / 100;
+
+    // ✅ store in context
+    applyCoupon(coupon, discountAmount);
+
+  } catch (err) {
+    alert("Invalid or already used coupon");
+  }
+};
   /* ================= CHECKOUT HANDLER ================= */
 
   const handleCheckout = () => {
@@ -105,7 +125,7 @@ export default function Cart() {
 
               <button
                 onClick={() => decreaseQty(item.id)}
-                className="px-3"
+                className="px-3 border-r-2 text-[#1C8057]"
               >
                 −
               </button>
@@ -114,7 +134,7 @@ export default function Cart() {
 
               <button
                 onClick={() => addToCart(item)}
-                className="px-3"
+                className="px-3 border-l-2 text-[#1C8057]"
               >
                 +
               </button>
@@ -135,13 +155,18 @@ export default function Cart() {
 
           <div className="flex gap-3">
             <input
-              placeholder="Coupon code"
-              className="border rounded-full px-4 py-2"
-            />
+  value={coupon}
+  onChange={(e) => setCoupon(e.target.value)}
+  placeholder="Enter coupon code"
+  className="border rounded-full px-4 py-2"
+/>
 
-            <button className="bg-green-700 text-white px-6 rounded-full">
-              Apply coupon
-            </button>
+<button
+  onClick={handleApplyCoupon}
+  className="bg-green-700 text-white px-6 rounded-full"
+>
+  Apply
+</button>
           </div>
 
           <button
@@ -201,6 +226,13 @@ export default function Cart() {
             <span>₹ {tax}</span>
           </div>
 
+          {discount > 0 && (
+  <div className="flex justify-between">
+    <span>Coupon Discount</span>
+    <span>- ₹ {discount.toFixed(2)}</span>
+  </div>
+)}
+
           <hr />
 
           <div className="flex justify-between font-bold text-lg">
@@ -209,6 +241,7 @@ export default function Cart() {
           </div>
 
         </div>
+
 
         {/* CHECKOUT BUTTON */}
         <button

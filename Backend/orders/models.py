@@ -43,18 +43,31 @@ class Order(models.Model):
     razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
 
     order_status = models.CharField(
-        max_length=20,
-        choices=ORDER_STATUS,
-        default="placed"
-    )
+    max_length=20,
+    choices=ORDER_STATUS,
+    default="placed",
+    db_index=True
+)
 
     payment_status = models.CharField(
-        max_length=20,
-        choices=PAYMENT_STATUS,
-        default="pending"
-    )
+    max_length=20,
+    choices=PAYMENT_STATUS,
+    default="pending",
+    db_index=True
+)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    @property
+    def status_step(self):
+        status_map = {
+            "placed": 0,
+            "accepted": 1,
+            "progress": 2,
+            "ontheway": 3,
+            "delivered": 4,
+        }
+        return status_map.get(self.order_status, 0)
 
     def __str__(self):
         return f"Order #{self.id}"
@@ -73,3 +86,11 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+    
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_percent = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
