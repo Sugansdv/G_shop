@@ -70,6 +70,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     "https://your-site.netlify.app",
 # ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://g-shop-ecom.netlify.app/",
+]
+
 ROOT_URLCONF = 'g_shop.urls'
 
 TEMPLATES = [
