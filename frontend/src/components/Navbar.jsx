@@ -148,46 +148,17 @@ export default function Navbar() {
 
   {/* ---------- NOT LOGGED IN ---------- */}
   {!isAuthenticated ? (
-    <Link to="/login">
-      <img src={userIcon} className="w-6 cursor-pointer" />
-    </Link>
-  ) : (
-
-    <>
-      {/* USER BUTTON */}
-      <div
-        onClick={() => setOpenAccount(!openAccount)}
-        className="flex items-center gap-2 cursor-pointer"
-      >
-        <img src={userIcon} className="w-6" />
-
-        <span className="hidden md:block font-semibold">
-          Hello {user.username}
-        </span>
-      </div>
-
-      {/* DROPDOWN */}
-      {openAccount && (
-        <div className="absolute right-0 mt-3 w-40 bg-white text-black rounded-lg shadow-lg z-50">
-
-          <Link
-            to="/profile"
-            className="block px-4 py-2 hover:bg-gray-100"
-          >
-            My Account
-          </Link>
-
-          <button
-            onClick={logout}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100"
-          >
-            Logout
-          </button>
-
-        </div>
-      )}
-    </>
-  )}
+  <Link to="/login">
+    <img src={userIcon} className="w-6 cursor-pointer" />
+  </Link>
+) : (
+  <Link to="/account" className="flex items-center gap-2">
+    <img src={userIcon} className="w-6" />
+    <span className="hidden md:block font-semibold">
+      Hello {user.username}
+    </span>
+  </Link>
+)}
 
 </div>
             </div>
@@ -209,13 +180,14 @@ export default function Navbar() {
 
     {/* Left Menu Links */}
     <div className="flex flex-wrap gap-12 font-medium text-md">
-      <a href="#">Home</a>
-      <a href="#">Shop</a>
-      <a href="#">Fruits</a>
-      <a href="#">Vegetables</a>
-      <a href="#">Beverages</a>
-      <a href="#">About us</a>
-      <a href="#">Blogs</a>
+      <a href="/">Home</a>
+      <a href="/product">Shop</a>
+      <a href="/products?category=Fruits">Fruits</a>
+      <a href="/products?category=Vegetables">Vegetables</a>
+      <a href="/products?category=Beverages">Beverages</a>
+      <a href="/about">About us</a>
+      <a href="/faq">FAQ</a>
+      <a href="/blogs">Blogs</a>
     </div>
 
     {/* Right Side Recently View */}

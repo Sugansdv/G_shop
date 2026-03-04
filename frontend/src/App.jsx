@@ -14,7 +14,8 @@ import AboutSection from "./pages/AboutSection";
 
 import TrackOrder from "./pages/TrackOrder";
 import TrackStatus from "./pages/TrackStatus";
-// import Profile from "./pages/Profile"; // ✅ Add this
+import HomePage from "./pages/HomePage";
+import Accounts from "./pages/Accounts";
 
 export default function App() {
   return (
@@ -23,9 +24,11 @@ export default function App() {
 
       <Routes>
         {/* Home */}
-        <Route path="/" element={<Products />} />
+        <Route path="/" element={<HomePage />} />
 
         {/* Products */}
+        
+        <Route path="/product" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetail />} />
 
         {/* Cart & Wishlist */}
@@ -36,8 +39,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Profile (Navbar dropdown uses this) */}
-        {/* <Route path="/profile" element={<Profile />} /> */}
+        <Route path="/account" element={<Accounts />} />
 
         {/* Checkout & Orders */}
         <Route path="/checkout" element={<Checkout />} />
