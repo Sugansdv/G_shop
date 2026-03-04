@@ -62,16 +62,15 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173/",
-#     "https://g-shop-ecom.netlify.app/",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://g-shop-ecom.netlify.app",
+]
 # CSRF_TRUSTED_ORIGINS = [
 #     "https://your-site.netlify.app",
 # ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://g-shop-ecom.netlify.app/",
+    "https://g-shop-ecom.netlify.app",
 ]
 
 ROOT_URLCONF = 'g_shop.urls'

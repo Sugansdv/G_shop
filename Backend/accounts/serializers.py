@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 
+from django.db import transaction
+
 class RegisterSerializer(serializers.ModelSerializer):
 
     phone = serializers.CharField(write_only=True)
@@ -12,6 +14,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ["username", "email", "password", "phone"]
         extra_kwargs = {"password": {"write_only": True}}
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists.")
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists.")
+        return value
+
+    @transaction.atomic
     def create(self, validated_data):
 
         phone = validated_data.pop("phone")
@@ -29,10 +42,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=last_name,
         )
 
-        Profile.objects.create(
-            user=user,
-            phone=phone
-        )
+        user.profile.phone = phone
+        user.profile.save()
 
         return user
     
