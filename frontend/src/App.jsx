@@ -16,6 +16,8 @@ import TrackOrder from "./pages/TrackOrder";
 import TrackStatus from "./pages/TrackStatus";
 import HomePage from "./pages/HomePage";
 import Accounts from "./pages/Accounts";
+import Blog from "./pages/Blog";
+import BlogDetails from "./pages/Blogdetails";
 
 export default function App() {
   return (
@@ -48,6 +50,9 @@ export default function App() {
         {/* Info Pages */}
         <Route path="/faq" element={<FAQ />} />
         <Route path="/about" element={<AboutSection />} />
+        <Route path="/blogs" element={<Blog />} />
+
+      <Route path="/blog/:id" element={<BlogDetails />} />
 
         {/* TRACK ORDER FORM */}
         <Route path="/track-order" element={<TrackOrder />} />

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import {
   createOrder,
   createPayment,
 } from "../api/orderApi";
 import { verifyPayment } from "../api/orderApi";
+import { getAddresses } from "../api/addressApi";
 
 export default function Checkout() {
 
@@ -16,6 +17,58 @@ export default function Checkout() {
   const [saved, setSaved] = useState(false);
   const [orderId, setOrderId] = useState(null);
   const [message, setMessage] = useState("");
+  const [addressType, setAddressType] = useState("delivery");
+  const [savedAddress, setSavedAddress] = useState(null);
+  const [formData, setFormData] = useState({});
+
+  useEffect(() => {
+  loadAddress();
+}, []);
+
+const loadAddress = async () => {
+  try {
+
+    const res = await getAddresses();
+
+    if (res.data.length > 0) {
+      setSavedAddress(res.data[0]);
+      setFormData(res.data[0]);
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const handleAddressType = (type) => {
+
+  setAddressType(type);
+
+if (type === "delivery") {
+
+  if (savedAddress) {
+    setFormData(savedAddress);
+  }
+
+}
+
+  if (type === "billing") {
+    setFormData({
+      first_name: "",
+      last_name: "",
+      company: "",
+      country: "",
+      street_address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      phone: "",
+      email: "",
+    });
+  }
+
+};
 
   /* ================= PRICE CALC ================= */
 
@@ -29,49 +82,50 @@ export default function Checkout() {
 
   const total = subtotal + shipping + tax - discount;
 
-  /* ================= SAVE BILLING ================= */
+/* ================= SAVE BILLING ================= */
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (cart.length === 0) {
+    alert("Cart is empty");
+    return;
+  }
 
-    try {
-      const form = new FormData(e.target);
+  try {
 
-      const orderData = {
-  first_name: form.get("first_name"),
-  last_name: form.get("last_name"),
-  company: form.get("company"),
-  country: form.get("country"),
-  street_address: form.get("street_address"),
-  city: form.get("city"),
-  state: form.get("state"),
-  zip_code: form.get("zip_code"),
-  phone: form.get("phone"),
-  email: form.get("email"),
-  coupon_code: appliedCoupon,
-  subtotal: subtotal.toString(),
-shipping: shipping.toString(),
-tax: tax.toString(),
-total: total.toString(),
+    const orderData = {
 
-  items: cart.map(item => ({
-    product_name: item.name,
-    price: Number(item.price),
-    qty: item.qty,
-  })),
+      ...formData,   // address from delivery or billing form
+
+      coupon_code: appliedCoupon,
+
+      subtotal: subtotal.toString(),
+      shipping: shipping.toString(),
+      tax: tax.toString(),
+      total: total.toString(),
+
+      items: cart.map(item => ({
+        product_name: item.name,
+        price: Number(item.price),
+        qty: item.qty,
+      })),
+
+    };
+
+    const res = await createOrder(orderData);
+
+    setSaved(true);
+    setOrderId(res.data.order_id);
+
+    setMessage("Address updated. Now proceed to checkout.");
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Failed to save billing details");
+
+  }
 };
-
-      const res = await createOrder(orderData);
-
-      setSaved(true);
-      setOrderId(res.data.order_id);
-      setMessage("✅ Address updated. Now proceed to checkout.");
-
-    } catch (err) {
-      console.error(err);
-      alert("Failed to save billing details");
-    }
-  };
 
   /* ================= RAZORPAY PAYMENT ================= */
 
@@ -94,35 +148,47 @@ total: total.toString(),
 
 
       const options = {
-        key: res.data.key,
-        amount: res.data.amount,
-        currency: res.data.currency,
-        order_id: res.data.razorpay_order_id,
+  key: res.data.key,
+  amount: res.data.amount,
+  currency: res.data.currency,
+  order_id: res.data.razorpay_order_id,
 
-        name: "Grocery Store",
-        description: "Order Payment",
+  name: "Grocery Store",
+  description: "Order Payment",
 
-       handler: async function (response) {
+  prefill: {
+    name: `${formData.first_name} ${formData.last_name}`,
+    email: formData.email,
+    contact: formData.phone,
+  },
+
+  theme: {
+    color: "#1C8057",
+  },
+
+  handler: async function (response) {
 
     try {
-        await verifyPayment({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-        });
 
-        // CLEAR CART AFTER SUCCESS
-        clearCart();
+      await verifyPayment({
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+      });
 
-        // REDIRECT
-        window.location.href = `/bill/${orderId}`;
+      clearCart();
+      window.location.href = `/bill/${orderId}`;
 
     } catch (err) {
-        console.error("Verification failed:", err);
-        alert("Payment verification failed");
+
+      console.error("Verification failed:", err);
+      alert("Payment verification failed");
+
     }
-},
-      };
+
+  },
+
+};
 
       const rzp = new window.Razorpay(options);
       rzp.open();
@@ -149,23 +215,128 @@ total: total.toString(),
           className="md:col-span-2 space-y-5"
         >
 
+          <div className="flex gap-6 mb-6">
+
+  <label className="flex items-center gap-2">
+    <input
+      type="radio"
+      checked={addressType === "delivery"}
+      onChange={() => handleAddressType("delivery")}
+    />
+    Delivery Address
+  </label>
+
+  <label className="flex items-center gap-2">
+    <input
+      type="radio"
+      checked={addressType === "billing"}
+      onChange={() => handleAddressType("billing")}
+    />
+    Use Different Billing Address
+  </label>
+
+</div>
+
           <h2 className="text-2xl font-semibold">
             Billing Details
           </h2>
 
           <div className="grid grid-cols-2 gap-6">
-            <Input label="First Name *" name="first_name" />
-            <Input label="Last Name *" name="last_name" />
+            <Input
+  label="First Name *"
+  name="first_name"
+  value={formData.first_name || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, first_name: e.target.value });
+    setSaved(false);
+  }}
+/>
+
+            <Input
+  label="Last Name *"
+  name="last_name"
+  value={formData.last_name || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, last_name: e.target.value });
+    setSaved(false);
+  }}
+/>
           </div>
 
-          <Input label="Company NAME (OPTIONAL)" name="company" />
-          <Input label="Country *" name="country" />
-          <Input label="Street Address *" name="street_address" />
-          <Input label="City *" name="city" />
-          <Input label="State *" name="state" />
-          <Input label="Zip Code *" name="zip_code" />
-          <Input label="Phone *" name="phone" />
-          <Input label="Email *" name="email" />
+          <Input
+  label="Company NAME (OPTIONAL)"
+  name="company"
+  value={formData.company || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, company: e.target.value });
+    setSaved(false);
+  }}
+  required={false}
+/>
+          <Input
+  label="Country *"
+  name="country"
+  value={formData.country || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, country: e.target.value });
+    setSaved(false);
+  }}
+/>
+          <Input
+  label="Street Address *"
+  name="street_address"
+  value={formData.street_address || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, street_address: e.target.value });
+    setSaved(false);
+  }}
+/>
+          <Input
+  label="City *"
+  name="city"
+  value={formData.city || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, city: e.target.value });
+    setSaved(false);
+  }}
+/>
+          <Input
+  label="State *"
+  name="state"
+  value={formData.state || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, state: e.target.value });
+    setSaved(false);
+  }}
+/>
+          <Input
+  label="Zip Code *"
+  name="zip_code"
+  value={formData.zip_code || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, zip_code: e.target.value });
+    setSaved(false);
+  }}
+/>
+
+          <Input
+  label="Phone *"
+  name="phone"
+  value={formData.phone || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, phone: e.target.value });
+    setSaved(false);
+  }}
+/>
+          <Input
+  label="Email *"
+  name="email"
+  value={formData.email || ""}
+  onChange={(e) => {
+    setFormData({ ...formData, email: e.target.value });
+    setSaved(false);
+  }}
+/>
 
           <div className="text-center pt-6">
             <button
@@ -259,16 +430,21 @@ total: total.toString(),
 
 /* ================= INPUT COMPONENT ================= */
 
-function Input({ label, name }) {
+function Input({ label, name, value, onChange, required = true }) {
+
   return (
+
     <div>
+
       <label className="block mb-2 text-sm">
         {label}
       </label>
 
       <input
         name={name}
-        required
+        value={value}
+        onChange={onChange}
+        required={required}
         className="
           w-full
           border
@@ -280,6 +456,8 @@ function Input({ label, name }) {
           focus:ring-green-600
         "
       />
+
     </div>
+
   );
 }

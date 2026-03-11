@@ -71,7 +71,7 @@ export default function Login() {
   /* ================= UI ================= */
 
   return (
-    <div className="relative min-h-screen flex items-center -my-16">
+    <div className="relative min-h-screen flex items-center ">
 
       {/* BACKGROUND */}
       <img

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
 import PersonalInfo from "../components/account/PersonalInfo";
+import ManageAddress from "../components/account/ManageAddress";
+import MyOrders from "../components/account/MyOrders";
+import PaymentMethod from "../components/account/PaymentMethod";
+import PasswordManager from "../components/account/PasswordManager";
 
 export default function Accounts() {
 
@@ -75,27 +78,21 @@ export default function Accounts() {
 
       {/* ================= CONTENT ================= */}
 
-      <div className="flex-1">
+      {/* ================= CONTENT ================= */}
 
-        {active === "personal" && <PersonalInfo />}
+<div className="flex-1">
 
-        {active === "orders" && (
-          <Placeholder title="My Orders" />
-        )}
+  {active === "personal" && <PersonalInfo />}
 
-        {active === "address" && (
-          <Placeholder title="Manage Address" />
-        )}
+  {active === "orders" && <MyOrders />}
 
-        {active === "payment" && (
-          <Placeholder title="Payment Method" />
-        )}
+  {active === "address" && <ManageAddress />}
 
-        {active === "password" && (
-          <Placeholder title="Password Manager" />
-        )}
+  {active === "payment" && <PaymentMethod />}
 
-      </div>
+  {active === "password" && <PasswordManager />}
+
+</div>
 
     </div>
   );

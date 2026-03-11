@@ -23,7 +23,7 @@ export default function Navbar() {
   const [openAccount, setOpenAccount] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
 
       {/* ================= FIRST ROW ================= */}
       <div className="bg-[#F9C51A] text-sm">
@@ -182,9 +182,9 @@ export default function Navbar() {
     <div className="flex flex-wrap gap-12 font-medium text-md">
       <a href="/">Home</a>
       <a href="/product">Shop</a>
-      <a href="/products?category=Fruits">Fruits</a>
-      <a href="/products?category=Vegetables">Vegetables</a>
-      <a href="/products?category=Beverages">Beverages</a>
+      <a href="/product?category=Fruits">Fruits</a>
+      <a href="/product?category=Chocolates">Chocolates</a>
+      <a href="/product?category=Beverages">Beverages</a>
       <a href="/about">About us</a>
       <a href="/faq">FAQ</a>
       <a href="/blogs">Blogs</a>

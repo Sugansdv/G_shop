@@ -4,6 +4,12 @@ from .models import Product
 
 class ProductFilter(django_filters.FilterSet):
 
+    # ✅ CATEGORY BY NAME (FIXED)
+    category = django_filters.CharFilter(
+        field_name="category__name",
+        lookup_expr="iexact"   # case insensitive
+    )
+
     # ✅ PRICE RANGE
     price_min = django_filters.NumberFilter(
         field_name="price",

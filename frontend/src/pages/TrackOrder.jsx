@@ -80,54 +80,76 @@ export default function TrackOrder() {
             </p>
 
             {/* STATUS TRACKER */}
-            <div className="border rounded-2xl p-8 mb-12">
-              <div className="relative flex justify-between items-center">
+            {/* STATUS TRACKER OR CANCEL MESSAGE */}
 
-                {/* Background Line */}
-                <div className="absolute top-20 left-0 w-full h-1 bg-gray-200"></div>
+{order.order_status === "cancelled" ? (
 
-                {/* Active Line */}
-                <div
-                  className="absolute top-20 left-0 h-1 bg-green-600 transition-all duration-500"
-                  style={{
-                    width: `${(order.current_step / (steps.length - 1)) * 100}%`,
-                  }}
-                ></div>
+  <div className="bg-red-50 border border-red-200 text-red-600 p-6 rounded-xl text-center mb-12">
+    <h3 className="text-lg font-semibold">
+      You cancelled the order
+    </h3>
+    <p className="text-sm mt-2">
+      This order has been cancelled and will not be delivered.
+    </p>
+    <p className="text-sm mt-2">
+      Your payment will be refunded within 3-5 business days if it was already processed.
+    </p>
+  </div>
 
-                {steps.map((step, index) => {
-                  const Icon = step.icon;
-                  const isActive = index <= order.current_step;
+) : (
 
-                  return (
-                    <div
-                      key={index}
-                      className="flex flex-col items-center flex-1 relative z-10"
-                    >
-                      <div
-                        className={`w-12 h-12 flex items-center justify-center rounded-xl border-2
-                        ${
-                          isActive
-                            ? "bg-green-50 border-green-600 text-green-600"
-                            : "bg-gray-50 border-gray-300 text-gray-400"
-                        }`}
-                      >
-                        <Icon className="w-6 h-6" />
-                      </div>
+  <div className="border rounded-2xl p-8 mb-12">
+    <div className="relative flex justify-between items-center">
 
-                      <p className="text-sm mt-3 font-medium text-center">
-                        {step.label}
-                      </p>
+      {/* Background Line */}
+      <div className="absolute top-20 left-0 w-full h-1 bg-gray-200"></div>
 
-                      <p className="text-xs text-gray-400 mt-5">
-                        {order[step.key]
-                          ? new Date(order[step.key]).toLocaleDateString()
-                          : "Expected"}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+      {/* Active Line */}
+      <div
+        className="absolute top-20 left-0 h-1 bg-green-600 transition-all duration-500"
+        style={{
+          width: `${(order.current_step / (steps.length - 1)) * 100}%`,
+        }}
+      ></div>
+
+      {steps.map((step, index) => {
+        const Icon = step.icon;
+        const isActive = index <= order.current_step;
+
+        return (
+          <div
+            key={index}
+            className="flex flex-col items-center flex-1 relative z-10"
+          >
+            <div
+              className={`w-12 h-12 flex items-center justify-center rounded-xl border-2
+              ${
+                isActive
+                  ? "bg-green-50 border-green-600 text-green-600"
+                  : "bg-gray-50 border-gray-300 text-gray-400"
+              }`}
+            >
+              <Icon className="w-6 h-6" />
             </div>
+
+            <p className="text-sm mt-3 font-medium text-center">
+              {step.label}
+            </p>
+
+            <p className="text-xs text-gray-400 mt-5">
+              {order[step.key]
+                ? new Date(order[step.key]).toLocaleDateString()
+                : "Expected"}
+            </p>
+
+          </div>
+        );
+      })}
+
+    </div>
+  </div>
+
+)}
 
             {/* PRODUCT SECTION */}
             <div>

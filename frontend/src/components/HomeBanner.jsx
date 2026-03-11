@@ -19,8 +19,8 @@ import pink from "../assets/images/pink-circle.png";
 
 const HomeBanner = () => {
   return (
-    <section className="w-full py-20 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-10 items-center">
+    <section className="w-full py-10 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-2 items-center">
 
         {/* LEFT COLUMN */}
 
@@ -31,12 +31,12 @@ const HomeBanner = () => {
             The Best Online Grocery Store
           </div>
 
-          <h1 className="text-5xl lg:text-6xl font-bold mt-6 leading-tight">
+          <h1 className="text-3xl lg:text-5xl font-bold mt-6 leading-tight">
             Your One ! Stop Shop <br />
             For <span className="text-[#1c8057]">Quality Groceries</span>
           </h1>
 
-          <p className="text-gray-500 mt-6 max-w-lg">
+          <p className="text-[#1c8057] font-medium mt-6 max-w-lg">
             Online shop to connect easy for customers and quality delivery
             of healthy groceries with the best quantity and freshness.
           </p>
@@ -45,11 +45,11 @@ const HomeBanner = () => {
 
           <div className="flex items-center gap-8 mt-8">
 
-            <button className="bg-[#1c8057] text-white px-8 py-4 rounded-full flex items-center gap-2 hover:opacity-90">
+            <button className="bg-[#1c8057] text-white font-medium px-6 py-2 rounded-full flex items-center gap-2 hover:opacity-90">
               Shop Now →
             </button>
 
-            <button className="text-[#5a1e1e] font-medium border-b">
+            <button className="text-[#5a1e1e] font-medium border-b-2 border-[#5a1e1e] hover:border-[#1c8057] transition-colors">
               View All Products
             </button>
 
@@ -68,7 +68,7 @@ const HomeBanner = () => {
 
             <div>
               <p className="font-semibold">⭐ 4.8 Ratings</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#1c8057]">
                 Trusted by 75+ customers
               </p>
             </div>
@@ -84,13 +84,14 @@ const HomeBanner = () => {
           {/* delivery person */}
 
           <img
-            src={deliveryman}
-            className="relative z-10 w-[420px]"
-          />
+  src={deliveryman}
+  className="relative z-10 max-h-[520px] w-full object-contain"
+/>
 
           {/* secure payment card */}
+ 
 
-          <div className="absolute left-0 top-24 bg-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3">
+          <div className="absolute left-10 top-24 bg-white shadow-lg rounded-full px-6 py-2 flex items-center gap-3" style={{ boxShadow: '20px 4px 4px 0px #00000040' }}>
 
             <div className="bg-[#1c8057] p-2 rounded-full">
               <img src={wallet} className="w-4"/>
@@ -100,12 +101,12 @@ const HomeBanner = () => {
               secure payments
             </p>
 
-            <img src={star} className="w-5 absolute -right-3 -top-2"/>
+            <img src={star} className="w-10 absolute -right-4 top-2"/>
           </div>
 
           {/* fast delivery card */}
 
-          <div className="absolute left-10 bottom-16 bg-white shadow-lg rounded-full px-6 py-3 flex items-center gap-3">
+          <div className="absolute left-0 bottom-16 bg-white shadow-lg rounded-full px-6 py-2 flex items-center gap-3" style={{ boxShadow: '20px 4px 4px 0px #00000040' }}>
 
             <div className="bg-[#1c8057] p-2 rounded-full">
               <img src={truck} className="w-4"/>
@@ -115,14 +116,18 @@ const HomeBanner = () => {
               Fast delivery
             </p>
 
-            <img src={star} className="w-5 absolute -right-3 -top-2"/>
+            <img src={star} className="w-10 absolute -right-4 top-2"/>
           </div>
 
           {/* DECORATIVE CIRCLES */}
 
           <img src={yellow} className="absolute bottom-10 right-10 w-8"/>
-          <img src={purple} className="absolute top-40 right-0 w-6"/>
-          <img src={pink} className="absolute top-0 left-20 w-10"/>
+          <img src={yellow} className="absolute top-64 left-16 w-8"/>
+          <img src={purple} className="absolute top-32 right-10 w-8"/>
+          
+          <img src={purple} className="absolute top-44 left-60 w-4"/>
+          <img src={pink} className="absolute top-10 left-52 w-12"/>
+           <img src={purple} className="absolute bottom-0 left-56 w-8"/>
 
         </div>
 

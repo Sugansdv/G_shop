@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from .models import Order, OrderItem
+from .models import Address, Order, OrderItem, PaymentCard
 from .serializers import CreateOrderSerializer
 
 
@@ -325,7 +325,6 @@ def track_order(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # ✅ Define status mapping BEFORE return
     status_map = {
         "placed": 0,
         "accepted": 1,
@@ -336,6 +335,7 @@ def track_order(request):
 
     return Response({
         "id": order.id,
+        "order_status": order.order_status,   # ⭐ IMPORTANT
         "current_step": status_map.get(order.order_status, 0),
         "items": [
             {
@@ -346,3 +346,219 @@ def track_order(request):
             for item in order.items.all()
         ]
     })
+
+class MyOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user).order_by("-created_at")
+
+        serializer = OrderDetailSerializer(orders, many=True)
+
+        return Response(serializer.data)
+    
+    
+# views.py
+
+class CancelOrderView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+
+        try:
+            order = Order.objects.get(id=pk, user=request.user)
+
+            if order.order_status not in ["placed", "accepted"]:
+                return Response(
+                    {"error": "Order cannot be cancelled"},
+                    status=400
+                )
+
+            order.order_status = "cancelled"
+            order.save()
+
+            return Response({"message": "Order cancelled"})
+
+        except Order.DoesNotExist:
+            return Response({"error": "Order not found"}, status=404)
+
+class RequestCancelOrder(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+
+        try:
+            order = Order.objects.get(id=pk, user=request.user)
+
+            if order.order_status in ["delivered", "cancelled"]:
+                return Response(
+                    {"error": "Order cannot be cancelled"},
+                    status=400
+                )
+
+            order.cancel_status = "requested"
+            order.save()
+
+            return Response({
+                "message": "Cancel request sent to admin"
+            })
+
+        except Order.DoesNotExist:
+            return Response(
+                {"error": "Order not found"},
+                status=404
+            )
+            
+from .models import Review
+
+
+class CreateReviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        product_name = request.data.get("product_name")
+        rating = request.data.get("rating")
+        comment = request.data.get("comment")
+        
+        if Review.objects.filter(
+            user=request.user,
+            product_name=product_name
+        ).exists():
+            return Response(
+                {"error": "You have already reviewed this product"},
+                status=400
+            )
+
+        Review.objects.create(
+            user=request.user,
+            product_name=product_name,
+            rating=rating,
+            comment=comment
+        )
+
+        return Response({"message": "Review added"})
+    
+    
+    
+            
+from .models import Address    
+class AddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        addresses = Address.objects.filter(user=request.user)
+
+        data = [
+            {
+                "id": a.id,
+                "first_name": a.first_name,
+                "last_name": a.last_name,
+                "company": a.company,
+                "country": a.country,
+                "street_address": a.street_address,
+                "city": a.city,
+                "state": a.state,
+                "zip_code": a.zip_code,
+                "phone": a.phone,
+                "email": a.email,
+            }
+            for a in addresses
+        ]
+
+        return Response(data)
+
+    def post(self, request):
+
+        Address.objects.create(
+            user=request.user,
+            first_name=request.data.get("first_name"),
+            last_name=request.data.get("last_name"),
+            company=request.data.get("company"),
+            country=request.data.get("country"),
+            street_address=request.data.get("street_address"),
+            city=request.data.get("city"),
+            state=request.data.get("state"),
+            zip_code=request.data.get("zip_code"),
+            phone=request.data.get("phone"),
+            email=request.data.get("email"),
+        )
+
+        return Response({"message": "Address saved"})
+    
+    
+class DeleteAddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+
+        try:
+            address = Address.objects.get(id=pk, user=request.user)
+            address.delete()
+            return Response({"message": "Address deleted"})
+        except Address.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+        
+class UpdateAddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+
+        try:
+            address = Address.objects.get(id=pk, user=request.user)
+
+            for field in request.data:
+                setattr(address, field, request.data[field])
+
+            address.save()
+
+            return Response({"message": "Address updated"})
+
+        except Address.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+        
+class SaveCardView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        card_holder = request.data.get("card_holder")
+        card_number = request.data.get("card_number")
+        expiry_month = request.data.get("expiry_month")
+        expiry_year = request.data.get("expiry_year")
+
+        card = PaymentCard.objects.create(
+            user=request.user,
+            card_holder=card_holder,
+            card_number=card_number,
+            expiry_month=expiry_month,
+            expiry_year=expiry_year,
+        )
+
+        return Response({
+            "message": "Card saved"
+        })
+        
+        
+class MyCardsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        cards = PaymentCard.objects.filter(user=request.user)
+
+        data = []
+
+        for card in cards:
+            data.append({
+                "id": card.id,
+                "card_holder": card.card_holder,
+                "card_number": card.masked_number(),
+                "expiry_month": card.expiry_month,
+                "expiry_year": card.expiry_year,
+            })
+
+        return Response(data)

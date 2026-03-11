@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchProducts } from "../api/productApi";
-
+import { useSearchParams } from "react-router-dom";
 import FilterSidebar from "../components/FilterSidebar";
 import ProductCard from "../components/ProductCard";
 import Pagination from "../components/Pagination";
@@ -13,6 +13,7 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const [filters, setFilters] = useState({
     page: 1,
@@ -24,6 +25,16 @@ export default function Products() {
     price_max: "",
     rating_range: "",
   });
+  useEffect(() => {
+  const categoryFromUrl = searchParams.get("category") || "";
+
+  setFilters(prev => ({
+    ...prev,
+    category: categoryFromUrl,
+    page: 1,
+  }));
+
+}, [searchParams]);
 
   /* ================= LOAD PRODUCTS ================= */
 
@@ -31,27 +42,34 @@ export default function Products() {
     loadProducts();
   }, [filters]);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const cleanFilters = Object.fromEntries(
-      Object.entries(filters).filter(
+ const loadProducts = async () => {
+  try {
+    setLoading(true);
+
+    const categoryFromUrl = searchParams.get("category");
+
+    const finalFilters = {
+      ...filters,
+      category: categoryFromUrl || "",
+    };
+
+    const cleanFilters = Object.fromEntries(
+      Object.entries(finalFilters).filter(
         ([_, v]) => v !== "" && v !== null
       )
     );
 
-      // const res = await fetchProducts(filters);
-      const res = await fetchProducts(cleanFilters);
+    const res = await fetchProducts(cleanFilters);
 
-      setProducts(res.data.results || []);
-      setTotal(res.data.count || 0);
+    setProducts(res.data.results || []);
+    setTotal(res.data.count || 0);
 
-    } catch (err) {
-      console.error("Product fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error("Product fetch error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ================= PAGINATION COUNT ================= */
 

@@ -1,5 +1,6 @@
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
+import { Link } from "react-router-dom";
 
 export default function Wishlist() {
 
@@ -100,9 +101,11 @@ export default function Wishlist() {
 
         </div>
 
-        <button className="bg-green-700 text-white px-6 py-2 rounded-full">
-          Order Track
-        </button>
+        <Link to="/track-order">
+  <button className="bg-green-700 text-white px-6 py-2 rounded-full">
+    Track Order
+  </button>
+</Link>
 
       </div>
 
