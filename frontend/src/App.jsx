@@ -17,7 +17,7 @@ import TrackStatus from "./pages/TrackStatus";
 import HomePage from "./pages/HomePage";
 import Accounts from "./pages/Accounts";
 import Blog from "./pages/Blog";
-import BlogDetails from "./pages/Blogdetails";
+import BlogDetails from "./pages/BlogDetails";
 
 export default function App() {
   return (
